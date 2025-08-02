@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="uk" class="light"> <!-- Default to light theme, JS will override -->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MESH - Високошвидкісний Інтернет з AI-помічником</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3csvg viewBox='0 0 500 500' fill='none' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M116 439.999L116 105.999L186 173.385' stroke='%23F99F30' stroke-width='45' stroke-linecap='round' stroke-linejoin='round'/%3e%3cpath d='M384 52.9999L384 387L314 319.614' stroke='%233D9242' stroke-width='45' stroke-linecap='round' stroke-linejoin='round'/%3e%3cpath d='M296.652,243.317L116.317,441.348' stroke='%23E3373E' stroke-width='45' stroke-linecap='round'/%3e%3cpath d='M230.99 215.659L383.659 54.0092' stroke='%233AB09B' stroke-width='45' stroke-linecap='round'/%3e%3c/svg%3e">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> <!-- Markdown Parser -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Russo+One&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary-translucent: rgba(248, 246, 241, 0.85);
+      /* Off-white translucent */
+      --bg-secondary-translucent: rgba(243, 240, 233, 0.85);
+      /* Darker off-white translucent */
+      --bg-primary-solid: #F8F6F1;
+      /* Off-white solid */
+      --text-primary: #1f2937;
+      /* gray-800 */
+      --text-secondary: #4b5563;
+      /* gray-600 */
+      --text-accent: #D97706;
+      /* amber-600 */
+      --border-color: #e5e7eb;
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+      --icon-shadow: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+      --hero-overlay-start: rgba(28, 25, 23, 0.5);
+      /* Neutral dark overlay */
+      --hero-overlay-end: rgba(28, 25, 23, 0.6);
+      --header-height-large: 128px;
+      --header-height-small: 72px;
+
+      /* Static Header Colors (always dark) */
+      --header-bg-solid: #111827;
+      --header-bg-translucent: rgba(17, 24, 39, 0.85);
+      --header-text-primary: #f9fafb;
+      --header-text-secondary: #d1d5db;
+    }
+
+    html.dark {
+      --bg-primary-translucent: rgba(17, 24, 39, 0.8);
+      --bg-secondary-translucent: rgba(31, 41, 55, 0.8);
+      --bg-primary-solid: #111827;
+      --text-primary: #f9fafb;
+      /* gray-50 */
+      --text-secondary: #d1d5db;
+      /* gray-300 */
+      --text-accent: #FBBF24;
+      /* amber-400 */
+      --border-color: #374151;
+      /* gray-700 */
+      --shadow-color: rgba(0, 0, 0, 0.4);
+      --text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      --icon-shadow: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.5));
+      --hero-overlay-start: rgba(17, 24, 39, 0.6);
+      /* Slightly darker for dark mode */
+      --hero-overlay-end: rgba(0, 0, 0, 0.7);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background-color: #e5e7eb;
+      /* Fallback background */
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    .font-heading {
+      font-family: 'Russo One', sans-serif;
+      text-shadow: var(--text-shadow);
+    }
+
+    /* General component styles */
+    .bg-primary {
+      background-color: var(--bg-primary-translucent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .bg-secondary {
+      background-color: var(--bg-secondary-translucent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .text-primary {
+      color: var(--text-primary);
+    }
+
+    .text-secondary {
+      color: var(--text-secondary);
+    }
+
+    .text-accent {
+      color: var(--text-accent);
+    }
+
+    .border-default {
+      border-color: var(--border-color);
+    }
+
+    .shadow-custom {
+      box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -1px var(--shadow-color);
+    }
+
+    .shadow-custom-lg {
+      box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    }
+
+    /* Dynamic Header */
+    #main-header {
+      position: fixed;
+      width: 100%;
+      top: 0;
+      left: 0;
+      z-index: 50;
+      background-color: var(--header-bg-solid);
+      transition: height 0.3s ease-in-out, background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out, -webkit-backdrop-filter 0.3s ease-in-out;
+    }
+
+    #main-header.scrolled-past {
+      background-color: var(--header-bg-translucent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px -1px var(--shadow-color);
+    }
+
+    #main-header .header-text-primary {
+      color: var(--header-text-primary);
+    }
+
+    #main-header .header-text-secondary {
+      color: var(--header-text-secondary);
+    }
+
+    /* Header Menu Interaction */
+    nav a:not(.cta-button) {
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    nav a:not(.cta-button)::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: var(--text-accent);
+      bottom: -5px;
+      left: 0;
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.2s ease-out;
+    }
+
+    nav a:not(.cta-button):hover::after,
+    nav a.active-link::after {
+      transform: scaleX(1);
+    }
+
+    nav a.active-link {
+      color: var(--text-accent) !important;
+    }
+
+
+    /* Mobile Menu Animation */
+    #mobile-menu-overlay {
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    #mobile-menu {
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(100%);
+      background-color: var(--header-bg-translucent);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    #mobile-menu.is-open {
+      transform: translateX(0);
+    }
+
+    .hero-section {
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      z-index: 1;
+      transform: translateX(-50%) translateY(-50%);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, var(--hero-overlay-start), var(--hero-overlay-end));
+      z-index: 2;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+    }
+
+    .cta-button {
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px var(--shadow-color);
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    /* NEW Tariff Card Styles */
+    .plan-card-new {
+      position: relative;
+      background-color: #374151;
+      /* gray-700 */
+      color: #f9fafb;
+      /* gray-50 */
+      border-radius: 1rem;
+      padding: 2rem;
+      padding-top: 7rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 15px -3px var(--shadow-color);
+    }
+
+    .plan-card-new:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px var(--shadow-color);
+    }
+
+    .plan-header {
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      height: 120px;
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: 900;
+    }
+
+    .plan-header-econom {
+      background-color: #F59E0B;
+    }
+
+    /* amber-500 */
+    .plan-header-standart {
+      background-color: #84CC16;
+    }
+
+    /* lime-500 */
+    .plan-header-premium {
+      background-color: #A855F7;
+    }
+
+    /* purple-500 */
+
+    .plan-price {
+      font-size: 3.75rem;
+      /* 60px */
+      line-height: 1;
+      text-shadow: var(--text-shadow);
+    }
+
+    .plan-period {
+      font-size: 1.125rem;
+      /* 18px */
+      font-weight: 500;
+    }
+
+    .plan-title {
+      font-size: 2.25rem;
+      /* 36px */
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .faq-item summary {
+      cursor: pointer;
+      outline: none;
+      transition: color 0.2s;
+    }
+
+    .faq-item[open]>summary {
+      color: var(--text-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-item summary::after {
+      content: '+';
+      float: right;
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .faq-item[open] summary::after {
+      transform: rotate(45deg);
+    }
+
+    /* Gemini feature styles */
+    .gemini-response {
+      background-color: var(--bg-secondary-translucent);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--text-accent);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .gemini-response p,
+    .gemini-response li {
+      margin-bottom: 0.75rem;
+    }
+
+    .gemini-response ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+    }
+
+    .gemini-response strong {
+      color: var(--text-primary);
+    }
+
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--text-accent);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Creative Scroll Animations */
+    .reveal {
+      opacity: 0;
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+
+    .reveal-left {
+      transform: translateX(-50px);
+    }
+
+    .reveal-right {
+      transform: translateX(50px);
+    }
+
+    .reveal-bottom {
+      transform: translateY(50px);
+    }
+
+    .reveal-zoom {
+      transform: scale(0.9);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateX(0) translateY(0) scale(1);
+    }
+
+    /* Scroll to Top Button */
+    #scroll-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--text-accent);
+      color: white;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      /* Increased z-index */
+      opacity: 0;
+      transform: translateY(100px);
+      transition: opacity 0.3s, transform 0.3s;
+      animation: bounce-float 4s infinite 2s;
+    }
+
+    #scroll-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes bounce-float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      5% {
+        transform: translateY(-10px);
+      }
+
+      10% {
+        transform: translateY(0);
+      }
+    }
+
+    /* Animated Background Canvas */
+    .plexus-bg {
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .plexus-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+
+    /* Why Us Icon Interaction */
+    #why-us .reveal>div {
+      transition: transform 0.3s ease-out;
+    }
+
+    #why-us .reveal>div:hover {
+      transform: translateY(-10px);
+    }
+
+    #why-us svg {
+      filter: var(--icon-shadow);
+    }
+
+    /* Footer Social Icon Interaction */
+    footer a[aria-label] {
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    footer a[aria-label]:hover {
+      transform: scale(1.2) rotate(-5deg);
+      color: var(--text-accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="main-content-wrapper">
+    <!-- Header -->
+    <header id="main-header">
+      <div class="container mx-auto px-6 h-full flex justify-between items-center">
+        <div id="logo-container" class="transition-transform duration-300 ease-in-out">
+          <a href="index.html" class="flex items-center gap-3">
+            <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-10 w-auto">
+              <path d="M116 439.999L116 105.999L186 173.385" stroke="#F99F30" stroke-width="45" stroke-linecap="round"
+                stroke-linejoin="round"></path>
+              <path d="M384 52.9999L384 387L314 319.614" stroke="#3D9242" stroke-width="45" stroke-linecap="round"
+                stroke-linejoin="round"></path>
+              <path d="M296.652,243.317L116.317,441.348" stroke="#E3373E" stroke-width="45" stroke-linecap="round">
+              </path>
+              <path d="M230.99 215.659L383.659 54.0092" stroke="#3AB09B" stroke-width="45" stroke-linecap="round">
+              </path>
+            </svg>
+            <div>
+              <div class="font-bold text-xl header-text-primary tracking-wide font-heading">MESH</div>
+              <div class="text-xs header-text-secondary">інтернет-провайдер</div>
+            </div>
+          </a>
+        </div>
+        <div class="flex items-center h-full">
+          <nav class="hidden lg:flex space-x-6 items-center mr-4">
+            <a href="#plans" class="header-text-secondary hover:text-accent">Тарифи</a>
+            <a href="#about" class="header-text-secondary hover:text-accent">Про компанію</a>
+            <a href="agreement.html" class="header-text-secondary hover:text-accent">Публічний договір</a>
+            <a href="#faq" class="header-text-secondary hover:text-accent">FAQ</a>
+            <a href="https://billing.mesh.org.ua:9443//" target="_blank"
+              class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700 cta-button font-heading">Особистий
+              кабінет</a>
+          </nav>
+          <!-- Theme Toggle -->
+          <button id="theme-toggle"
+            class="p-2 rounded-full header-text-secondary hover:bg-gray-200 dark:hover:bg-gray-700">
+            <svg id="theme-icon-light" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+              </path>
+            </svg>
+            <svg id="theme-icon-dark" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+          </button>
+          <button class="lg:hidden header-text-secondary ml-4" id="mobile-menu-button">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu-overlay"
+      class="fixed inset-0 bg-black/50 z-30 hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="mobile-menu" class="lg:hidden fixed top-0 right-0 h-full w-64 shadow-lg z-40 p-6 pt-36">
+      <a href="#plans" class="block py-3 text-lg text-secondary hover:text-accent">Тарифи</a>
+      <a href="#about" class="block py-3 text-lg text-secondary hover:text-accent">Про компанію</a>
+      <a href="agreement.html" class="block py-3 text-lg text-secondary hover:text-accent">Публічний договір</a>
+      <a href="#faq" class="block py-3 text-lg text-secondary hover:text-accent">FAQ</a>
+      <a href="https://billing.mesh.org.ua:9443//" target="_blank"
+        class="block mt-4 bg-amber-600 text-white text-center px-4 py-3 rounded-md hover:bg-amber-700">Особистий
+        кабінет</a>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section text-white py-24 md:py-40">
+      <div class="hero-overlay"></div>
+      <video autoplay muted playsinline id="hero-video"
+        poster="https://placehold.co/1920x1080/111827/FFFFFF?text=Loading...">
+        <source src="mesh-main-baner.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <div class="hero-content container mx-auto px-6 text-center reveal reveal-bottom">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Інтернет, що літає</h1>
+        <p class="text-lg md:text-xl mb-8 max-w-3xl mx-auto">Стабільне оптоволоконне з'єднання до 1 Гбіт/с для
+          стрімінгу, ігор та роботи без компромісів.</p>
+        <div class="max-w-xl mx-auto">
+          <form id="address-form" class="flex flex-col sm:flex-row gap-2 bg-primary p-2 rounded-lg shadow-lg">
+            <input type="text" id="address-input" placeholder="Введіть вашу адресу для перевірки"
+              class="flex-grow p-3 text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <button type="submit"
+              class="bg-amber-600 text-white font-bold px-8 py-3 rounded-md hover:bg-amber-700 cta-button">Перевірити</button>
+          </form>
+          <div id="address-message" class="mt-4 text-white font-medium"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section id="plans" class="py-20 bg-secondary plexus-bg">
+      <canvas class="plexus-canvas" data-particle-color-light="rgba(217, 119, 6, 0.8)"
+        data-line-color-light="rgba(217, 119, 6, 0.3)" data-particle-color-dark="rgba(251, 191, 36, 0.7)"
+        data-line-color-dark="rgba(251, 191, 36, 0.25)"></canvas>
+      <div class="container mx-auto px-6 relative z-10">
+        <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 reveal reveal-bottom text-primary">Оберіть свій
+          ідеальний тариф</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- Plan 1: Eконом -->
+          <div class="plan-card-new reveal reveal-left">
+            <div class="plan-header plan-header-econom">
+              <div class="plan-price font-heading">270</div>
+              <div class="plan-period font-heading">грн/міс</div>
+            </div>
+            <div class="plan-body-new">
+              <h3 class="plan-title text-amber-500 dark:text-amber-400">Econom</h3>
+              <div class="space-y-4 text-lg">
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>до 10 Mb/s</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.721 19.542C9.026 21.054 10.783 22 12.684 22s3.658-.946 4.963-2.458M12 6.012A5.95 5.95 0 007.037 3.5M12 6.012A5.95 5.95 0 0116.963 3.5">
+                    </path>
+                  </svg>
+                  <span>Необмежений</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                  </svg>
+                  <span>9 грн/день</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plan 2: Стандарт -->
+          <div class="plan-card-new reveal reveal-bottom">
+            <div class="plan-header plan-header-standart">
+              <div class="plan-price font-heading">330</div>
+              <div class="plan-period font-heading">грн/міс</div>
+            </div>
+            <div class="plan-body-new">
+              <h3 class="plan-title text-lime-500 dark:text-lime-400">Standart</h3>
+              <div class="space-y-4 text-lg">
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>до 200 Mb/s *</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.721 19.542C9.026 21.054 10.783 22 12.684 22s3.658-.946 4.963-2.458M12 6.012A5.95 5.95 0 007.037 3.5M12 6.012A5.95 5.95 0 0116.963 3.5">
+                    </path>
+                  </svg>
+                  <span>Необмежений</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                  </svg>
+                  <span>11 грн/день</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Plan 3: Преміум -->
+          <div class="plan-card-new reveal reveal-right">
+            <div class="plan-header plan-header-premium">
+              <div class="plan-price font-heading">360</div>
+              <div class="plan-period font-heading">грн/міс</div>
+            </div>
+            <div class="plan-body-new">
+              <h3 class="plan-title text-purple-500 dark:text-purple-400">Premium</h3>
+              <div class="space-y-4 text-lg">
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>до 1Gb/s *</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h10a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.721 19.542C9.026 21.054 10.783 22 12.684 22s3.658-.946 4.963-2.458M12 6.012A5.95 5.95 0 007.037 3.5M12 6.012A5.95 5.95 0 0116.963 3.5">
+                    </path>
+                  </svg>
+                  <span>Необмежений</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                    </path>
+                  </svg>
+                  <span>12 грн/день</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+  </section>
+
+  <!-- Gemini Tariff Advisor -->
+  <section id="tariff-advisor" class="py-20 bg-primary plexus-bg">
+    <canvas class="plexus-canvas" data-particle-color-light="rgba(59, 130, 246, 0.8)"
+      data-line-color-light="rgba(59, 130, 246, 0.3)" data-particle-color-dark="rgba(96, 165, 250, 0.7)"
+      data-line-color-dark="rgba(96, 165, 250, 0.25)"></canvas>
+    <div class="container mx-auto px-6 max-w-3xl text-center reveal reveal-zoom relative z-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">✨ Не знаєте, який тариф обрати?</h2>
+      <p class="text-lg text-secondary mb-8">Опишіть, для чого вам потрібен інтернет, і наш AI-помічник підбере
+        найкращий варіант.</p>
+      <textarea id="usage-description" rows="4"
+        class="w-full p-3 rounded-md border border-default bg-secondary text-primary focus:outline-none focus:ring-2 focus:ring-amber-500"
+        placeholder="Наприклад: 'Я працюю з дому, часто проводжу відеоконференції, а ввечері дивлюся фільми у високій якості. Також у мене двоє дітей, які грають в онлайн-ігри.'"></textarea>
+      <button id="get-recommendation-btn"
+        class="mt-4 bg-amber-600 text-white font-bold px-8 py-3 rounded-md hover:bg-amber-700 cta-button inline-flex items-center gap-2">
+        Порадити тариф
+      </button>
+      <div id="recommendation-loader" class="mt-4 mx-auto loader hidden"></div>
+      <div id="recommendation-result" class="mt-4 text-left gemini-response hidden"></div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us Section -->
+  <section id="why-us" class="py-20 bg-secondary plexus-bg">
+    <canvas class="plexus-canvas" data-particle-color-light="rgba(34, 197, 94, 0.8)"
+      data-line-color-light="rgba(34, 197, 94, 0.3)" data-particle-color-dark="rgba(74, 222, 128, 0.7)"
+      data-line-color-dark="rgba(74, 222, 128, 0.25)"></canvas>
+    <div class="container mx-auto px-6 relative z-10">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 reveal reveal-bottom">Чому обирають MESH?</h2>
+      <div class="grid md:grid-cols-3 gap-12 text-center">
+        <div class="reveal reveal-left">
+          <div
+            class="bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Надійність</h3>
+          <p class="text-secondary">Гарантована швидкість та стабільність з'єднання 24/7.</p>
+        </div>
+        <div class="reveal reveal-bottom">
+          <div
+            class="bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Підтримка</h3>
+          <p class="text-secondary">Кваліфікована технічна підтримка завжди на зв'язку.</p>
+        </div>
+        <div class="reveal reveal-right">
+          <div
+            class="bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-2">Технології</h3>
+          <p class="text-secondary">Сучасна технологія GPON для найкращого досвіду.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Us Section -->
+  <section id="about" class="py-20 bg-primary plexus-bg">
+    <canvas class="plexus-canvas" data-particle-color-light="rgba(139, 92, 246, 0.7)"
+      data-line-color-light="rgba(139, 92, 246, 0.2)" data-particle-color-dark="rgba(167, 139, 250, 0.6)"
+      data-line-color-dark="rgba(167, 139, 250, 0.15)"></canvas>
+    <div class="container mx-auto px-6 max-w-4xl text-center reveal reveal-zoom relative z-10">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Про компанію</h2>
+      <p class="text-lg text-secondary leading-relaxed">
+        Компанія "Mesh" спеціалізується на наданні високошвидкісного доступу до мережі інтернет, використовуючи передові
+        технології.
+        Завдяки нашій компанії, Ви можете підключитися до мережі Інтернет на недоступній раніше швидкості та в чудовій
+        якості. Вам також будуть доступні мережеві/онлайн ігри та багато інших ресурсів всесвітньої мережі...
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="py-20 bg-secondary plexus-bg">
+    <canvas class="plexus-canvas" data-particle-color-light="rgba(217, 119, 6, 0.8)"
+      data-line-color-light="rgba(217, 119, 6, 0.3)" data-particle-color-dark="rgba(251, 191, 36, 0.7)"
+      data-line-color-dark="rgba(251, 191, 36, 0.25)"></canvas>
+    <div class="container mx-auto px-6 max-w-3xl relative z-10">
+      <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 reveal reveal-bottom">Поширені запитання</h2>
+      <div class="space-y-4 reveal reveal-bottom">
+        <details class="faq-item bg-primary p-6 rounded-lg shadow-sm">
+          <summary class="text-lg font-medium">Як швидко відбувається підключення?</summary>
+          <p class="text-secondary mt-4">Зазвичай підключення займає 1-3 робочі дні з моменту подання заявки. Наш
+            майстер зв'яжеться з вами для узгодження зручного часу.</p>
+        </details>
+        <details class="faq-item bg-primary p-6 rounded-lg shadow-sm">
+          <summary class="text-lg font-medium">Чи потрібно купувати додаткове обладнання?</summary>
+          <p class="text-secondary mt-4">Ми надаємо сучасний Wi-Fi роутер в оренду або ви можете використовувати
+            власний, якщо він сумісний з нашою мережею.</p>
+        </details>
+        <details class="faq-item bg-primary p-6 rounded-lg shadow-sm">
+          <summary class="text-lg font-medium">Як я можу оплатити послуги?</summary>
+          <p class="text-secondary mt-4">Сплатити можна онлайн через особистий кабінет, за допомогою банківських
+            додатків, а також у терміналах самообслуговування.</p>
+        </details>
+      </div>
+
+      <!-- Gemini FAQ -->
+      <div class="mt-16 text-center reveal reveal-zoom">
+        <h3 class="text-2xl md:text-3xl font-bold mb-4">✨ Не знайшли відповідь?</h3>
+        <p class="text-lg text-secondary mb-8">Запитайте нашого AI-помічника!</p>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input type="text" id="faq-question" placeholder="Введіть ваше запитання тут..."
+            class="flex-grow p-3 rounded-md border border-default bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <button id="get-faq-answer-btn"
+            class="bg-amber-600 text-white font-bold px-8 py-3 rounded-md hover:bg-amber-700 cta-button inline-flex items-center justify-center gap-2">
+            Запитати
+          </button>
+        </div>
+        <div id="faq-loader" class="mt-4 mx-auto loader hidden"></div>
+        <div id="faq-result" class="mt-4 text-left gemini-response hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact/Footer -->
+  <footer id="contact" class="bg-gray-900 text-white">
+    <div class="container mx-auto px-6 py-12">
+      <div class="grid md:grid-cols-3 gap-8 text-center md:text-left reveal reveal-bottom">
+        <div>
+          <a href="index.html" class="flex items-center gap-3 justify-center md:justify-start mb-4">
+            <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg" class="h-8 w-auto">
+              <path d="M116 439.999L116 105.999L186 173.385" stroke="#F99F30" stroke-width="45" stroke-linecap="round"
+                stroke-linejoin="round"></path>
+              <path d="M384 52.9999L384 387L314 319.614" stroke="#3D9242" stroke-width="45" stroke-linecap="round"
+                stroke-linejoin="round"></path>
+              <path d="M296.652,243.317L116.317,441.348" stroke="#E3373E" stroke-width="45" stroke-linecap="round">
+              </path>
+              <path d="M230.99 215.659L383.659 54.0092" stroke="#3AB09B" stroke-width="45" stroke-linecap="round">
+              </path>
+            </svg>
+            <div>
+              <div class="font-bold text-xl tracking-wide font-heading">MESH</div>
+            </div>
+          </a>
+          <p class="text-gray-400">Ваш надійний провідник у світ швидкого інтернету.</p>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Контакти</h3>
+          <ul class="text-gray-400 space-y-2">
+            <li><a href="#" class="hover:text-white">Харківська обл., м. Чугуїв</a></li>
+            <li><a href="tel:+380966860428" class="hover:text-white">+38 (096) 686-04-28</a></li>
+            <li><a href="tel:+380959347778" class="hover:text-white">+38 (095) 934-77-78</a></li>
+            <li><a href="tel:+380631236333" class="hover:text-white">+38 (063) 123-63-33</a></li>
+            <li><a href="mailto:tov.bpplus@gmail.com" class="hover:text-white">tov.bpplus@gmail.com</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Ми в соцмережах</h3>
+          <div class="flex space-x-4 justify-center md:justify-start">
+            <a href="#" aria-label="Facebook" class="text-gray-400 hover:text-white"><svg class="w-6 h-6"
+                fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd"
+                  d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                  clip-rule="evenodd" />
+              </svg></a>
+            <a href="#" aria-label="Telegram" class="text-gray-400 hover:text-white"><svg class="w-6 h-6"
+                fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.17.9-.502 1.202-.823 1.23-.696.065-1.225-.46-1.9-.902-1.018-.66-1.59-1.065-2.594-1.72-1.142-.757-.403-1.161.258-1.91.177-.215 3.25-2.973 3.312-3.236a.214.214 0 0 0-.053-.186.214.214 0 0 0-.21-.03c-.083.024-1.483.954-4.22 2.945-.858.61-1.623.92-2.3.902-.823-.024-1.478-.246-2.05-.472-.65-.257-1.155-.39-1.09-.78.03-.22.26-.438.718-.663 3.14-1.51 5.215-2.422 6.22-2.866 3.36-1.483 4.23-1.81 4.86-1.802z" />
+              </svg></a>
+            <a href="#" aria-label="Viber" class="text-gray-400 hover:text-white"><svg class="w-6 h-6"
+                fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M19.165 13.916c.332-.11.533-.37.533-.658 0-.02-.002-.04-.004-.062l-.007-.035c-.02-.11-.06-.21-.12-.31-.03-.04-.06-.09-.1-.13L15 6.166V5.5A1.5 1.5 0 0 0 13.5 4h-3A1.5 1.5 0 0 0 9 5.5v.665l-4.465 6.553c-.04.04-.07.09-.1.13-.06.1-.1.2-.12.31l-.007.035c-.002.02-.004.04-.004.062 0 .288.2.548.534.658.142.047.284.07.42.07.21 0 .41-.05.59-.15l.003-.002.003-.002c.11-.06.2-.14.28-.24l.007-.008 3.16-4.62h.01v7.285a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5V9h.01l3.16 4.62.008.008c.08.1.17.18.28.24l.003.002.003.002c.18.1.38.15.59.15.137 0 .278-.023.42-.07zm-5.11-9.166a.49.49 0 0 1 .14-.35.5.5 0 0 1 .71 0 .49.49 0 0 1 .14.35v.25h-1v-.25zm-2 0a.49.49 0 0 1 .14-.35.5.5 0 0 1 .71 0 .49.49 0 0 1 .14.35v.25h-1v-.25z" />
+              </svg></a>
+            <a href="#" aria-label="YouTube" class="text-gray-400 hover:text-white"><svg class="w-6 h-6"
+                fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M21.582 7.042c-.22-1.42-1.38-2.58-2.8-2.8C17.068 4 12 4 12 4s-5.068 0-6.782.242c-1.42.22-2.58 1.38-2.8 2.8C2 8.756 2 12 2 12s0 3.244.218 4.958c.22 1.42 1.38 2.58 2.8 2.8C6.932 20 12 20 12 20s5.068 0 6.782-.242c1.42-.22 2.58-1.38 2.8-2.8C22 15.244 22 12 22 12s0-3.244-.418-4.958zM10 15.464V8.536L16 12l-6 3.464z" />
+              </svg></a>
+            <a href="#" aria-label="X" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor"
+                viewBox="0 0 24 24">
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg></a>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-gray-700 pt-8 text-center text-gray-500">
+        <p>&copy; <span id="current-year"></span> MESH. Всі права захищено.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to top button -->
+  <div id="scroll-to-top">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+    </svg>
+  </div>
+
+  <script>
+    // --- Theme Toggler ---
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-icon-light');
+    const darkIcon = document.getElementById('theme-icon-dark');
+
+    const setTheme = (theme) => {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        lightIcon.classList.remove('hidden');
+        darkIcon.classList.add('hidden');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+        lightIcon.classList.add('hidden');
+        darkIcon.classList.remove('hidden');
+        localStorage.setItem('theme', 'light');
+      }
+    };
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    });
+
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else {
+      setTheme(prefersDark ? 'dark' : 'light');
+    }
+
+    // --- Mobile Menu Toggle ---
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+    const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+    const toggleMobileMenu = () => {
+      const isOpen = mobileMenu.classList.toggle('is-open');
+      if (isOpen) {
+        mobileMenuOverlay.classList.remove('hidden');
+        mobileMenuOverlay.style.opacity = '1';
+      } else {
+        mobileMenuOverlay.style.opacity = '0';
+        setTimeout(() => {
+          mobileMenuOverlay.classList.add('hidden');
+        }, 300);
+      }
+    };
+
+    mobileMenuButton.addEventListener('click', toggleMobileMenu);
+    mobileMenuLinks.forEach(link => {
+      link.addEventListener('click', toggleMobileMenu);
+    });
+    mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
+
+    // --- Address Check Simulation ---
+    const addressForm = document.getElementById('address-form');
+    const addressInput = document.getElementById('address-input');
+    const addressMessage = document.getElementById('address-message');
+    if (addressForm) {
+      addressForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const address = addressInput.value.trim();
+        addressMessage.textContent = '';
+        if (address === '') {
+          addressMessage.textContent = 'Будь ласка, введіть адресу.';
+          addressMessage.style.color = '#facc15'; // yellow-400
+          return;
+        }
+        addressMessage.textContent = 'Перевіряємо можливість підключення...';
+        addressMessage.style.color = 'white';
+        setTimeout(() => {
+          if (address.toLowerCase().includes('чугуїв')) {
+            addressMessage.textContent = 'Чудові новини! Ваш будинок можна підключити.';
+            addressMessage.style.color = '#4ade80'; // green-400
+          } else {
+            addressMessage.textContent = 'На жаль, за вашою адресою підключення поки недоступне.';
+            addressMessage.style.color = '#f87171'; // red-400
+          }
+        }, 2000);
+      });
+    }
+
+    // --- Dynamic Header & Scroll to Top Button Logic ---
+    const header = document.getElementById('main-header');
+    const logoContainer = document.getElementById('logo-container');
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    const mainContent = document.getElementById('main-content-wrapper');
+    const largeHeight = 128;
+    const smallHeight = 72;
+    const scrollDistance = largeHeight - smallHeight;
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const progress = Math.min(scrollY / scrollDistance, 1);
+
+      // Dynamic height and scale
+      const newHeight = largeHeight - (scrollDistance * progress);
+      header.style.height = `${newHeight}px`;
+      mainContent.style.paddingTop = `${newHeight}px`;
+      logoContainer.style.transform = `scale(${1.5 - (0.5 * progress)})`;
+
+      // Add shadow when fully scrolled
+      if (scrollY > scrollDistance) {
+        header.classList.add('scrolled-past');
+      } else {
+        header.classList.remove('scrolled-past');
+      }
+
+      // Scroll to top button visibility
+      if (scrollY > scrollDistance + 50) { // Appear after header is fully shrunk
+        scrollToTopBtn.classList.add('visible');
+      } else {
+        scrollToTopBtn.classList.remove('visible');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    document.addEventListener('DOMContentLoaded', handleScroll); // Run on initial load
+
+    scrollToTopBtn.addEventListener('click', () => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    });
+
+    // --- Smooth Scrolling for Menu Links ---
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // --- Creative Scroll Animations ---
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
+        }
+      });
+    }, {
+      threshold: 0.15
+    });
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      revealObserver.observe(el);
+    });
+
+    // --- Dynamic Year ---
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // --- Gemini API Integration ---
+
+    const callGemini = async (prompt) => {
+      const apiKey = "AIzaSyDEbk9qoATKzx9t4IxJIyJgIganfApgDwc"; // Для локальной работы вставьте сюда свой API-ключ от Google AI Studio
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      };
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.candidates && result.candidates.length > 0 &&
+          result.candidates[0].content && result.candidates[0].content.parts &&
+          result.candidates[0].content.parts.length > 0) {
+          return result.candidates[0].content.parts[0].text;
+        } else {
+          console.error("Unexpected API response structure:", result);
+          return "Вибачте, сталася помилка. Не вдалося отримати відповідь від AI-помічника.";
+        }
+
+      } catch (error) {
+        console.error("Error calling Gemini API:", error);
+        return "Вибачте, виникла проблема зі з'єднанням з AI-помічником. Будь ласка, спробуйте пізніше.";
+      }
+    };
+
+    // Tariff Advisor Logic
+    const getRecommendationBtn = document.getElementById('get-recommendation-btn');
+    if (getRecommendationBtn) {
+      const usageDescription = document.getElementById('usage-description');
+      const recommendationResult = document.getElementById('recommendation-result');
+      const recommendationLoader = document.getElementById('recommendation-loader');
+
+      getRecommendationBtn.addEventListener('click', async () => {
+        const description = usageDescription.value.trim();
+        if (!description) {
+          recommendationResult.textContent = 'Будь ласка, опишіть, для чого вам потрібен інтернет.';
+          recommendationResult.classList.remove('hidden');
+          return;
+        }
+
+        recommendationLoader.classList.remove('hidden');
+        recommendationResult.classList.add('hidden');
+        getRecommendationBtn.disabled = true;
+
+        const tariffInfo = `
+                    - Тариф "Економ": 270 грн/міс, швидкість до 10 Mb/s. Ідеально для базового перегляду сайтів та пошти.
+                    - Тариф "Стандарт": 330 грн/міс, швидкість до 200 Mb/s. Підходить для роботи, онлайн-ігор та стрімінгу у високій якості.
+                    - Тариф "Преміум": 360 грн/міс, швидкість до 1 Gb/s. Найкращий вибір для професіоналів, великих сімей та найвимогливіших завдань, як-от 4K-стрімінг на кількох пристроях одночасно.
+                `;
+
+        const prompt = `Ти — корисний AI-помічник інтернет-провайдера MESH. Проаналізуй опис потреб клієнта і порекомендуй найкращий тарифний план. Обґрунтуй свою відповідь. Ось опис потреб клієнта: "${description}". А ось інформація про тарифи: ${tariffInfo}. Відповідь дай українською мовою.`;
+
+        const responseText = await callGemini(prompt);
+
+        recommendationResult.innerHTML = marked.parse(responseText);
+        recommendationLoader.classList.add('hidden');
+        recommendationResult.classList.remove('hidden');
+        getRecommendationBtn.disabled = false;
+      });
+    }
+
+    // FAQ Logic
+    const getFaqAnswerBtn = document.getElementById('get-faq-answer-btn');
+    if (getFaqAnswerBtn) {
+      const faqQuestion = document.getElementById('faq-question');
+      const faqResult = document.getElementById('faq-result');
+      const faqLoader = document.getElementById('faq-loader');
+      const fullAgreementTextForContext = `Публічний договір про надання телекомунікаційних послуг...`; // A very long string with the agreement text
+
+      const siteContext = `
+                Інформація про компанію: Компанія "Mesh" спеціалізується на наданні високошвидкісного доступу до мережі інтернет, використовуючи передові технології GPON.
+                Тарифи: Економ (10 Mb/s, 270 грн/міс), Стандарт (200 Mb/s, 330 грн/міс), Преміум (1 Gb/s, 360 грн/міс).
+                Контакти: Харківська обл., м. Чугуїв, телефони 0966860428, 0959347778, 0631236333, email tov.bpplus@gmail.com.
+                Підключення: займає 1-3 робочі дні.
+                Оплата: онлайн, банківські додатки, термінали.
+                Публічний договір: ${fullAgreementTextForContext.replace(/<[^>]*>/g, ' ')}
+            `;
+
+      getFaqAnswerBtn.addEventListener('click', async () => {
+        const question = faqQuestion.value.trim();
+        if (!question) {
+          faqResult.textContent = 'Будь ласка, введіть ваше запитання.';
+          faqResult.classList.remove('hidden');
+          return;
+        }
+
+        faqLoader.classList.remove('hidden');
+        faqResult.classList.add('hidden');
+        getFaqAnswerBtn.disabled = true;
+
+        const prompt = `Ти — AI-асистент підтримки інтернет-провайдера MESH. Відповідай на запитання клієнта, використовуючи надану контекстну інформацію. Відповідай чітко, ввічливо та українською мовою. Контекст: ${siteContext}. Запитання клієнта: "${question}"`;
+
+        const responseText = await callGemini(prompt);
+
+        faqResult.innerHTML = marked.parse(responseText);
+        faqLoader.classList.add('hidden');
+        faqResult.classList.remove('hidden');
+        getFaqAnswerBtn.disabled = false;
+      });
+    }
+
+    // Plexus animation for multiple canvases
+    document.querySelectorAll('.plexus-canvas').forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+
+      const resizeCanvas = () => {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      };
+
+      const createParticles = () => {
+        particles = [];
+        const particleCount = Math.floor(canvas.width * canvas.height / 12000);
+        for (let i = 0; i < particleCount; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            radius: Math.random() * 2 + 1
+          });
+        }
+      };
+
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const isDark = document.documentElement.classList.contains('dark');
+        const particleColor = isDark ? (canvas.dataset.particleColorDark || 'rgba(251, 191, 36, 0.7)') : (canvas.dataset.particleColorLight || 'rgba(217, 119, 6, 0.8)');
+        const lineColor = isDark ? (canvas.dataset.lineColorDark || 'rgba(251, 191, 36, 0.25)') : (canvas.dataset.lineColorLight || 'rgba(217, 119, 6, 0.3)');
+
+        for (let i = 0; i < particles.length; i++) {
+          const p1 = particles[i];
+          p1.x += p1.vx;
+          p1.y += p1.vy;
+
+          if (p1.x < 0 || p1.x > canvas.width) p1.vx *= -1;
+          if (p1.y < 0 || p1.y > canvas.height) p1.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
+          ctx.fillStyle = particleColor;
+          ctx.fill();
+
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 150) {
+              ctx.beginPath();
+              ctx.moveTo(p1.x, p1.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = lineColor;
+              ctx.lineWidth = 1 - dist / 150;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      };
+
+      // Use ResizeObserver for better performance on resize
+      const resizeObserver = new ResizeObserver(() => {
+        resizeCanvas();
+        createParticles();
+      });
+      resizeObserver.observe(canvas.parentElement);
+
+      resizeCanvas();
+      createParticles();
+      animate();
+    });
+  </script>
+</body>
+
+</html>
