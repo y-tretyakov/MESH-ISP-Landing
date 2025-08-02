@@ -902,6 +902,10 @@
       </div>
       <div class="mt-8 border-t border-gray-700 pt-8 text-center text-gray-500">
         <p>&copy; <span id="current-year"></span> MESH. Всі права захищено.</p>
+        <div class="mt-4 text-xs text-gray-600">
+          <p>Сайт розроблено @CodeWarlord</p>
+          <p>Website developed by @CodeWarlord</p>
+        </div>
       </div>
     </div>
   </footer>
@@ -978,9 +982,19 @@
     const addressInput = document.getElementById('address-input');
     const addressMessage = document.getElementById('address-message');
     if (addressForm) {
+      const availableLocations = [
+        ['малинівка', 'малиновка'],
+        ['стара покровка', 'старая покровка'],
+        ['нова покровка', 'новая покровка'],
+        ['башкирівка', 'башкировка', 'клугино-башкирівка', 'клугино-башкировка'],
+        ['коробочкине', 'коробочкино'],
+        ['василів хутір', 'васильев хутор', 'василий хутор'],
+        ['есхар', 'эсхар']
+      ];
+
       addressForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const address = addressInput.value.trim();
+        const address = addressInput.value.trim().toLowerCase();
         addressMessage.textContent = '';
         if (address === '') {
           addressMessage.textContent = 'Будь ласка, введіть адресу.';
@@ -989,8 +1003,13 @@
         }
         addressMessage.textContent = 'Перевіряємо можливість підключення...';
         addressMessage.style.color = 'white';
+
         setTimeout(() => {
-          if (address.toLowerCase().includes('чугуїв')) {
+          const isAvailable = availableLocations.some(locationGroup =>
+            locationGroup.some(variant => address.includes(variant))
+          );
+
+          if (isAvailable) {
             addressMessage.textContent = 'Чудові новини! Ваш будинок можна підключити.';
             addressMessage.style.color = '#4ade80'; // green-400
           } else {
@@ -1078,7 +1097,7 @@
     // --- Gemini API Integration ---
 
     const callGemini = async (prompt) => {
-      const apiKey = "AIzaSyDEbk9qoATKzx9t4IxJIyJgIganfApgDwc"; // Для локальной работы вставьте сюда свой API-ключ от Google AI Studio
+      const apiKey = ""; // Для локальной работы вставьте сюда свой API-ключ от Google AI Studio
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
       const payload = {
